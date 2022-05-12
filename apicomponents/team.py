@@ -1,6 +1,5 @@
 import json
 
-
 class DependencyTrackTeam(object):
 
     def get_teamByUUID(self, uuid):
@@ -60,93 +59,6 @@ class DependencyTrackTeam(object):
             return response.status_code
 
     def update_team(self, name, uuid, key=[], ldapUsers=[], managedUsers=[], oidcUsers=[], mappedLdapGroups=[], mappedOidcGroups=[], permissions=[]):
-        """ 
-        Updates a team's fields including
-        Model:{
-            "uuid": "string",
-            "name": "string",
-            "apiKeys": [
-                {
-                "key": "string"
-                }
-            ],
-            "ldapUsers": [
-                {
-                "username": "string",
-                "dn": "string",
-                "teams": [
-                    null
-                ],
-                "email": "string",
-                "permissions": [
-                    {
-                    "name": "string",
-                    "description": "string"
-                    }
-                ]
-                }
-            ],
-            "managedUsers": [
-                {
-                "username": "string",
-                "newPassword": "string",
-                "confirmPassword": "string",
-                "lastPasswordChange": "2021-11-29T23:21:55.571Z",
-                "fullname": "string",
-                "email": "string",
-                "suspended": true,
-                "forcePasswordChange": true,
-                "nonExpiryPassword": true,
-                "teams": [
-                    null
-                ],
-                "permissions": [
-                    {
-                    "name": "string",
-                    "description": "string"
-                    }
-                ]
-                }
-            ],
-            "oidcUsers": [
-                {
-                "username": "string",
-                "subjectIdentifier": "string",
-                "email": "string",
-                "teams": [
-                    null
-                ],
-                "permissions": [
-                    {
-                    "name": "string",
-                    "description": "string"
-                    }
-                ]
-                }
-            ],
-            "mappedLdapGroups": [
-                {
-                "dn": "string",
-                "uuid": "string"
-                }
-            ],
-            "mappedOidcGroups": [
-                {
-                "group": {
-                    "uuid": "string",
-                    "name": "string"
-                },
-                "uuid": "string"
-                }
-            ],
-            "permissions": [
-                {
-                "name": "string",
-                "description": "string"
-                }
-            ]
-            } 
-        """
         data = {
             "name": name,
             "uuid": uuid,
@@ -177,93 +89,6 @@ class DependencyTrackTeam(object):
             return response.status_code
 
     def create_team(self, name, uuid=None, key=[], ldapUsers=[], managedUsers=[], oidcUsers=[], mappedLdapGroups=[], mappedOidcGroups=[], permissions=[]):
-        """ 
-        Updates a team's fields including
-        Model:{
-            "uuid": "string",
-            "name": "string",
-            "apiKeys": [
-                {
-                "key": "string"
-                }
-            ],
-            "ldapUsers": [
-                {
-                "username": "string",
-                "dn": "string",
-                "teams": [
-                    null
-                ],
-                "email": "string",
-                "permissions": [
-                    {
-                    "name": "string",
-                    "description": "string"
-                    }
-                ]
-                }
-            ],
-            "managedUsers": [
-                {
-                "username": "string",
-                "newPassword": "string",
-                "confirmPassword": "string",
-                "lastPasswordChange": "2021-11-29T23:21:55.571Z",
-                "fullname": "string",
-                "email": "string",
-                "suspended": true,
-                "forcePasswordChange": true,
-                "nonExpiryPassword": true,
-                "teams": [
-                    null
-                ],
-                "permissions": [
-                    {
-                    "name": "string",
-                    "description": "string"
-                    }
-                ]
-                }
-            ],
-            "oidcUsers": [
-                {
-                "username": "string",
-                "subjectIdentifier": "string",
-                "email": "string",
-                "teams": [
-                    null
-                ],
-                "permissions": [
-                    {
-                    "name": "string",
-                    "description": "string"
-                    }
-                ]
-                }
-            ],
-            "mappedLdapGroups": [
-                {
-                "dn": "string",
-                "uuid": "string"
-                }
-            ],
-            "mappedOidcGroups": [
-                {
-                "group": {
-                    "uuid": "string",
-                    "name": "string"
-                },
-                "uuid": "string"
-                }
-            ],
-            "permissions": [
-                {
-                "name": "string",
-                "description": "string"
-                }
-            ]
-            } 
-        """
         data = {
             "name": name,
         }
@@ -310,8 +135,32 @@ class DependencyTrackTeam(object):
         if response.status_code == 200:
             return teamlist
         else:
-            return (f"Unable to list projects", response.status_code)
-        
+            return (f"Unable to list teams", response.status_code)
+
+    def get_uuid_from_team_name(self, teamname, pageSize=100):
+        """Returns a list of all teams
+        """
+        teamlist = list()
+        teamuid = None
+        pageNumber = 1
+        response = self.session.get(
+            self.apicall + "/v1/team", params={'pageSize': pageSize, 'pageNumber': pageNumber})
+        for team in range(0, len(response.json())):
+            teamlist.append(response.json()[team-1])
+        while len(response.json()) == pageSize:
+            pageNumber += 1
+            response = self.session.get(
+                self.apicall + "/v1/team", params={'pageSize': pageSize, 'pageNumber': pageNumber})
+            for team in range(0, len(response.json())):
+                teamlist.append(response.json()[team-1])
+        for team in teamlist:
+            if team['name']==teamname:
+                teamuid = team['uuid']
+        if response.status_code == 200:
+            return teamuid
+        else:
+            return (f"Unable to list team", response.status_code)
+
     def delete_apikey(self, apikey):
         """Delete specified API key
 
